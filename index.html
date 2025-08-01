@@ -69,6 +69,7 @@
             const [showModal, setShowModal] = useState(false);
             const [modalContent, setModalContent] = useState({});
             const [isAnswered, setIsAnswered] = useState(false);
+            const [isGameComplete, setIsGameComplete] = useState(false);
 
             // --- Load saved progress from Local Storage ---
             useEffect(() => {
@@ -79,6 +80,10 @@
                         setCurrentLevelIndex(levelIndex);
                         setPoints(points);
                         setTaskIndex(taskIndex);
+                        // Check if game was already completed on load
+                        if (levelIndex >= levels.length -1 && taskIndex >= levels[levelIndex].tasks.length -1 ) {
+                            setIsGameComplete(true);
+                        }
                     } catch (e) {
                         console.error("Failed to parse saved game data.", e);
                         // Reset if data is corrupted
@@ -129,6 +134,7 @@
                         }, 5000); // Wait longer to allow user to read the new info
                     } else {
                         // Game completed
+                        setIsGameComplete(true);
                         setTimeout(() => {
                             setModalContent(prevContent => ({ ...prevContent, result: "Congratulations! You've completed all levels!" }));
                         }, 5000);
@@ -143,6 +149,15 @@
                 }
             };
             
+            // --- New restart function ---
+            const handleRestart = () => {
+                localStorage.removeItem("startupQuest");
+                setCurrentLevelIndex(0);
+                setPoints(0);
+                setTaskIndex(0);
+                setIsGameComplete(false);
+            };
+
             // --- Current level and task data ---
             const currentLevel = levels[currentLevelIndex];
             
@@ -192,23 +207,39 @@
                         { className: "text-gray-600 mb-4" },
                         currentLevel.description
                     ),
-                    React.createElement(
-                        "div",
-                        { className: "space-y-4" },
-                        currentLevel.tasks.map((task, index) =>
-                            React.createElement(
-                                "button",
-                                {
-                                    key: task.id,
-                                    onClick: () => handleTaskClick(task),
-                                    className: `w-full p-4 rounded-xl text-left font-semibold glow-button
-                                        ${index === taskIndex ? 'bg-indigo-600 text-white active' : 'bg-gray-200 text-gray-700'}`,
-                                    disabled: index !== taskIndex
-                                },
-                                `Task ${task.id}: ${task.text}`
+                    isGameComplete ? (
+                        React.createElement(
+                            "p",
+                            { className: "text-center text-xl font-bold text-green-600 mb-4" },
+                            "Congratulations! You've completed all levels!"
+                        )
+                    ) : (
+                        React.createElement(
+                            "div",
+                            { className: "space-y-4" },
+                            currentLevel.tasks.map((task, index) =>
+                                React.createElement(
+                                    "button",
+                                    {
+                                        key: task.id,
+                                        onClick: () => handleTaskClick(task),
+                                        className: `w-full p-4 rounded-xl text-left font-semibold glow-button
+                                            ${index === taskIndex ? 'bg-indigo-600 text-white active' : 'bg-gray-200 text-gray-700'}`,
+                                        disabled: index !== taskIndex
+                                    },
+                                    `Task ${task.id}: ${task.text}`
+                                )
                             )
                         )
                     )
+                ),
+                React.createElement(
+                    "button",
+                    {
+                        onClick: handleRestart,
+                        className: "mt-6 w-full p-3 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition-colors"
+                    },
+                    "Restart Game"
                 ),
                 showModal && React.createElement(
                     "div",
