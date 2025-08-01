@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Startup Quest</title>
     <!-- Load React and ReactDOM from CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
-    <!-- Babel is needed to transpile the JSX in the browser -->
-    <script src="https://cdn.jsdelivr.net/npm/babel-standalone@7.24.7/babel.min.js"></script>
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Optional: Add a custom font, like Inter -->
+    <!-- Add a custom font, Inter -->
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
     <style>
         body {
@@ -30,7 +28,7 @@
 <body class="bg-gradient-to-br from-indigo-50 to-blue-100 min-h-screen flex items-center justify-center p-4">
     <div id="root"></div>
 
-    <script type="text/babel">
+    <script>
         const { useState, useEffect } = React;
 
         // --- Game Data ---
@@ -141,84 +139,126 @@
             
             // --- Current level and task data ---
             const currentLevel = levels[currentLevelIndex];
-            const currentTask = currentLevel.tasks[taskIndex];
-
-            return (
-                <div className="container max-w-xl mx-auto p-4 bg-white rounded-3xl shadow-xl border border-gray-200">
-                    <h1 className="text-4xl font-extrabold text-center text-indigo-700 mb-6">
-                        Startup Quest
-                    </h1>
-
-                    <div className="flex justify-between items-center bg-gray-100 p-4 rounded-xl mb-6 shadow-inner">
-                        <div className="text-lg font-semibold text-gray-800">
-                            Points: <span className="text-indigo-600 font-bold">{points}</span>
-                        </div>
-                        <div className="text-lg font-semibold text-gray-800">
-                            Level: <span className="text-indigo-600 font-bold">{currentLevel.name}</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white p-6 rounded-2xl border-2 border-indigo-300">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-2">{currentLevel.name}</h2>
-                        <p className="text-gray-600 mb-4">{currentLevel.description}</p>
-                        <div className="space-y-4">
-                            {currentLevel.tasks.map((task, index) => (
-                                <button
-                                    key={task.id}
-                                    onClick={() => handleTaskClick(task)}
-                                    className={`w-full p-4 rounded-xl text-left font-semibold glow-button
-                                        ${index === taskIndex ? 'bg-indigo-600 text-white active' : 'bg-gray-200 text-gray-700'}`}
-                                    disabled={index !== taskIndex}
-                                >
-                                    Task {task.id}: {task.text}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* --- Modal Component --- */}
-                    {showModal && (
-                        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4">
-                            <div className="bg-white p-8 rounded-3xl max-w-sm w-full shadow-2xl">
-                                <h2 className="text-2xl font-bold text-gray-800 mb-2">{modalContent.text}</h2>
-                                <p className="mb-4 text-gray-700">{modalContent.question}</p>
-                                <div className="space-y-3">
-                                    {modalContent.options.map((option, i) => (
-                                        <button
-                                            key={i}
-                                            onClick={() => handleAnswer(option)}
-                                            className={`w-full p-3 rounded-xl text-white font-medium transition-all duration-300
-                                                ${isAnswered && option === modalContent.correct ? 'bg-green-500' : 'bg-blue-500 hover:bg-blue-600'}`}
-                                            disabled={isAnswered}
-                                        >
-                                            {option}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                {modalContent.result && (
-                                    <p className={`mt-6 text-center font-semibold text-lg transition-all duration-300
-                                        ${modalContent.result.includes("Correct") ? 'text-green-600' : 'text-red-600'}`}>
-                                        {modalContent.result}
-                                    </p>
-                                )}
-
-                                <button
-                                    onClick={() => setShowModal(false)}
-                                    className="mt-6 w-full p-3 bg-gray-300 text-gray-800 font-semibold rounded-xl hover:bg-gray-400 transition-colors"
-                                >
-                                    Close
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
+            
+            // Render logic with plain JavaScript (no JSX)
+            return React.createElement(
+                "div",
+                { className: "container max-w-xl mx-auto p-4 bg-white rounded-3xl shadow-xl border border-gray-200" },
+                React.createElement(
+                    "h1",
+                    { className: "text-4xl font-extrabold text-center text-indigo-700 mb-6" },
+                    "Startup Quest"
+                ),
+                React.createElement(
+                    "div",
+                    { className: "flex justify-between items-center bg-gray-100 p-4 rounded-xl mb-6 shadow-inner" },
+                    React.createElement(
+                        "div",
+                        { className: "text-lg font-semibold text-gray-800" },
+                        "Points: ",
+                        React.createElement(
+                            "span",
+                            { className: "text-indigo-600 font-bold" },
+                            points
+                        )
+                    ),
+                    React.createElement(
+                        "div",
+                        { className: "text-lg font-semibold text-gray-800" },
+                        "Level: ",
+                        React.createElement(
+                            "span",
+                            { className: "text-indigo-600 font-bold" },
+                            currentLevel.name
+                        )
+                    )
+                ),
+                React.createElement(
+                    "div",
+                    { className: "bg-white p-6 rounded-2xl border-2 border-indigo-300" },
+                    React.createElement(
+                        "h2",
+                        { className: "text-2xl font-bold text-gray-800 mb-2" },
+                        currentLevel.name
+                    ),
+                    React.createElement(
+                        "p",
+                        { className: "text-gray-600 mb-4" },
+                        currentLevel.description
+                    ),
+                    React.createElement(
+                        "div",
+                        { className: "space-y-4" },
+                        currentLevel.tasks.map((task, index) =>
+                            React.createElement(
+                                "button",
+                                {
+                                    key: task.id,
+                                    onClick: () => handleTaskClick(task),
+                                    className: `w-full p-4 rounded-xl text-left font-semibold glow-button
+                                        ${index === taskIndex ? 'bg-indigo-600 text-white active' : 'bg-gray-200 text-gray-700'}`,
+                                    disabled: index !== taskIndex
+                                },
+                                `Task ${task.id}: ${task.text}`
+                            )
+                        )
+                    )
+                ),
+                showModal && React.createElement(
+                    "div",
+                    { className: "fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4" },
+                    React.createElement(
+                        "div",
+                        { className: "bg-white p-8 rounded-3xl max-w-sm w-full shadow-2xl" },
+                        React.createElement(
+                            "h2",
+                            { className: "text-2xl font-bold text-gray-800 mb-2" },
+                            modalContent.text
+                        ),
+                        React.createElement(
+                            "p",
+                            { className: "mb-4 text-gray-700" },
+                            modalContent.question
+                        ),
+                        React.createElement(
+                            "div",
+                            { className: "space-y-3" },
+                            modalContent.options.map((option, i) =>
+                                React.createElement(
+                                    "button",
+                                    {
+                                        key: i,
+                                        onClick: () => handleAnswer(option),
+                                        className: `w-full p-3 rounded-xl text-white font-medium transition-all duration-300
+                                            ${isAnswered && option === modalContent.correct ? 'bg-green-500' : 'bg-blue-500 hover:bg-blue-600'}`,
+                                        disabled: isAnswered
+                                    },
+                                    option
+                                )
+                            )
+                        ),
+                        modalContent.result && React.createElement(
+                            "p",
+                            { className: `mt-6 text-center font-semibold text-lg transition-all duration-300
+                                ${modalContent.result.includes("Correct") ? 'text-green-600' : 'text-red-600'}` },
+                            modalContent.result
+                        ),
+                        React.createElement(
+                            "button",
+                            {
+                                onClick: () => setShowModal(false),
+                                className: "mt-6 w-full p-3 bg-gray-300 text-gray-800 font-semibold rounded-xl hover:bg-gray-400 transition-colors"
+                            },
+                            "Close"
+                        )
+                    )
+                )
             );
         };
 
         // --- Use the modern createRoot method to render the app ---
         const root = ReactDOM.createRoot(document.getElementById("root"));
-        root.render(<App />);
+        root.render(React.createElement(App, null));
     </script>
 </body>
 </html>
