@@ -70,6 +70,8 @@
             const [modalContent, setModalContent] = useState({});
             const [isAnswered, setIsAnswered] = useState(false);
             const [isGameComplete, setIsGameComplete] = useState(false);
+            const [showFinalModal, setShowFinalModal] = useState(false);
+            const [finalModalContent, setFinalModalContent] = useState({});
 
             // --- Load saved progress from Local Storage ---
             useEffect(() => {
@@ -80,13 +82,11 @@
                         setCurrentLevelIndex(levelIndex);
                         setPoints(points);
                         setTaskIndex(taskIndex);
-                        // Check if game was already completed on load
                         if (levelIndex >= levels.length -1 && taskIndex >= levels[levelIndex].tasks.length -1 ) {
                             setIsGameComplete(true);
                         }
                     } catch (e) {
                         console.error("Failed to parse saved game data.", e);
-                        // Reset if data is corrupted
                         localStorage.removeItem("startupQuest");
                     }
                 }
@@ -109,7 +109,6 @@
                 setIsAnswered(true);
 
                 if (answer === modalContent.correct) {
-                    // Correct answer logic
                     setPoints(prevPoints => prevPoints + modalContent.points);
                     
                     // Add the framework to the modal content on correct answer
@@ -118,27 +117,6 @@
                         result: `Correct! ${modalContent.info}`,
                         framework: levels[currentLevelIndex].framework
                     }));
-                    
-                    // Progress to the next task or level
-                    const currentLevel = levels[currentLevelIndex];
-                    if (taskIndex + 1 < currentLevel.tasks.length) {
-                        setTimeout(() => {
-                             setTaskIndex(prevIndex => prevIndex + 1);
-                             setShowModal(false);
-                        }, 5000); // Wait longer to allow user to read the new info
-                    } else if (currentLevelIndex + 1 < levels.length) {
-                        setTimeout(() => {
-                            setCurrentLevelIndex(prevIndex => prevIndex + 1);
-                            setTaskIndex(0);
-                            setShowModal(false);
-                        }, 5000); // Wait longer to allow user to read the new info
-                    } else {
-                        // Game completed
-                        setIsGameComplete(true);
-                        setTimeout(() => {
-                            setModalContent(prevContent => ({ ...prevContent, result: "Congratulations! You've completed all levels!" }));
-                        }, 5000);
-                    }
                 } else {
                     // Incorrect answer logic
                     setModalContent(prevContent => ({
@@ -147,6 +125,31 @@
                     }));
                     setTimeout(() => setIsAnswered(false), 2000); // Allow another attempt after 2s
                 }
+            };
+            
+            const handleCloseModal = () => {
+                const currentLevel = levels[currentLevelIndex];
+                
+                // If the answer was correct, progress the game
+                if (isAnswered && modalContent.result && modalContent.result.includes("Correct")) {
+                    if (taskIndex + 1 < currentLevel.tasks.length) {
+                         setTaskIndex(prevIndex => prevIndex + 1);
+                    } else if (currentLevelIndex + 1 < levels.length) {
+                        setCurrentLevelIndex(prevIndex => prevIndex + 1);
+                        setTaskIndex(0);
+                    } else {
+                        setIsGameComplete(true);
+                    }
+                }
+                
+                setShowModal(false);
+                setIsAnswered(false);
+            };
+
+            // --- Handler for clicking a level in the final workflow ---
+            const handleFinalLevelClick = (level) => {
+                setFinalModalContent(level);
+                setShowFinalModal(true);
             };
             
             // --- New restart function ---
@@ -186,48 +189,71 @@
                     React.createElement(
                         "div",
                         { className: "text-lg font-semibold text-gray-800" },
-                        "Level: ",
-                        React.createElement(
-                            "span",
-                            { className: "text-indigo-600 font-bold" },
-                            currentLevel.name
-                        )
+                        isGameComplete ? "Status: Complete" : `Level: ${currentLevel.name}`
                     )
                 ),
                 React.createElement(
                     "div",
                     { className: "bg-white p-6 rounded-2xl border-2 border-indigo-300" },
-                    React.createElement(
-                        "h2",
-                        { className: "text-2xl font-bold text-gray-800 mb-2" },
-                        currentLevel.name
-                    ),
-                    React.createElement(
-                        "p",
-                        { className: "text-gray-600 mb-4" },
-                        currentLevel.description
-                    ),
                     isGameComplete ? (
                         React.createElement(
-                            "p",
-                            { className: "text-center text-xl font-bold text-green-600 mb-4" },
-                            "Congratulations! You've completed all levels!"
+                            "div",
+                            null,
+                            React.createElement(
+                                "h2",
+                                { className: "text-2xl font-bold text-center text-green-600 mb-4" },
+                                "Congratulations! Your Startup Journey is Complete!"
+                            ),
+                            React.createElement(
+                                "p",
+                                { className: "text-center text-gray-600 mb-6" },
+                                "Select a phase below to review its framework."
+                            ),
+                            React.createElement(
+                                "div",
+                                { className: "space-y-4" },
+                                levels.map((level, index) => 
+                                    React.createElement(
+                                        "button",
+                                        {
+                                            key: level.id,
+                                            onClick: () => handleFinalLevelClick(level),
+                                            className: `w-full p-4 rounded-xl text-left font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors`
+                                        },
+                                        `Phase ${index + 1}: ${level.name}`
+                                    )
+                                )
+                            )
                         )
                     ) : (
                         React.createElement(
                             "div",
-                            { className: "space-y-4" },
-                            currentLevel.tasks.map((task, index) =>
-                                React.createElement(
-                                    "button",
-                                    {
-                                        key: task.id,
-                                        onClick: () => handleTaskClick(task),
-                                        className: `w-full p-4 rounded-xl text-left font-semibold glow-button
-                                            ${index === taskIndex ? 'bg-indigo-600 text-white active' : 'bg-gray-200 text-gray-700'}`,
-                                        disabled: index !== taskIndex
-                                    },
-                                    `Task ${task.id}: ${task.text}`
+                            null,
+                            React.createElement(
+                                "h2",
+                                { className: "text-2xl font-bold text-gray-800 mb-2" },
+                                currentLevel.name
+                            ),
+                            React.createElement(
+                                "p",
+                                { className: "text-gray-600 mb-4" },
+                                currentLevel.description
+                            ),
+                            React.createElement(
+                                "div",
+                                { className: "space-y-4" },
+                                currentLevel.tasks.map((task, index) =>
+                                    React.createElement(
+                                        "button",
+                                        {
+                                            key: task.id,
+                                            onClick: () => handleTaskClick(task),
+                                            className: `w-full p-4 rounded-xl text-left font-semibold glow-button
+                                                ${index === taskIndex ? 'bg-indigo-600 text-white active' : 'bg-gray-200 text-gray-700'}`,
+                                            disabled: index !== taskIndex
+                                        },
+                                        `Task ${task.id}: ${task.text}`
+                                    )
                                 )
                             )
                         )
@@ -302,7 +328,48 @@
                         React.createElement(
                             "button",
                             {
-                                onClick: () => setShowModal(false),
+                                onClick: handleCloseModal,
+                                className: "mt-6 w-full p-3 bg-gray-300 text-gray-800 font-semibold rounded-xl hover:bg-gray-400 transition-colors"
+                            },
+                            "Close"
+                        )
+                    )
+                ),
+                showFinalModal && React.createElement(
+                    "div",
+                    { className: "fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4" },
+                    React.createElement(
+                        "div",
+                        { className: "bg-white p-8 rounded-3xl max-w-sm w-full shadow-2xl" },
+                        React.createElement(
+                            "h2",
+                            { className: "text-2xl font-bold text-gray-800 mb-2" },
+                            finalModalContent.name
+                        ),
+                        React.createElement(
+                            "p",
+                            { className: "mb-4 text-gray-700" },
+                            finalModalContent.description
+                        ),
+                        finalModalContent.framework && React.createElement(
+                            "div",
+                            { className: "mt-4 p-4 bg-gray-100 rounded-lg" },
+                            React.createElement(
+                                "h3",
+                                { className: "text-xl font-bold text-gray-800 mb-2" },
+                                "The Framework"
+                            ),
+                            finalModalContent.framework.split('\n').map((line, i) => 
+                                React.createElement(
+                                    "p",
+                                    { key: i, className: "text-gray-700 mb-1", dangerouslySetInnerHTML: { __html: line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') } }
+                                )
+                            )
+                        ),
+                        React.createElement(
+                            "button",
+                            {
+                                onClick: () => setShowFinalModal(false),
                                 className: "mt-6 w-full p-3 bg-gray-300 text-gray-800 font-semibold rounded-xl hover:bg-gray-400 transition-colors"
                             },
                             "Close"
